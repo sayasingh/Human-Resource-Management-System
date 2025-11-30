@@ -1,0 +1,63 @@
+-- Create database
+CREATE DATABASE hrms;
+USE hrms;
+
+-- Create users table
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    role ENUM('admin', 'employee') NOT NULL
+);
+
+-- Create employees table
+CREATE TABLE employees (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    phone VARCHAR(15) NOT NULL,
+    department VARCHAR(50),
+    designation VARCHAR(50),
+    user_id INT,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- Create leave_requests table (updated foreign key)
+CREATE TABLE leave_requests (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    employee_id INT NOT NULL, 
+    reason TEXT NOT NULL,
+    from_date DATE NOT NULL,
+    to_date DATE NOT NULL,
+    status ENUM('Pending', 'Approved', 'Rejected') DEFAULT 'Pending',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (employee_id) REFERENCES employees(id) ON DELETE CASCADE
+);
+
+-- Create attendance table (updated foreign key)
+CREATE TABLE attendance (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    employee_id INT NOT NULL,
+    date DATE NOT NULL,
+    status ENUM('Present', 'Absent') DEFAULT 'Present',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (employee_id, date),
+    FOREIGN KEY (employee_id) REFERENCES employees(id) ON DELETE CASCADE
+);
+
+
+//Optional: Insert Admin Login Manually
+Use this to insert the default admin with password admin123. First, generate a hashed password.
+
+Create a temporary PHP file (e.g., hash.php):
+
+<?php
+echo password_hash("admin123", PASSWORD_DEFAULT);
+?>
+
+Run in browser → http://localhost/hrms/hash.php
+Copy the hash, then use it in the query below:
+
+INSERT INTO users (username, password, role) 
+VALUES ('admin', 'PASTE_HASH_HERE', 'admin');
+
